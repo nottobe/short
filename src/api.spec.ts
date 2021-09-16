@@ -1,23 +1,25 @@
-import * as request from "supertest";
+import * as request from 'supertest';
 
-import { Repository } from "./persistence";
-import api from "./api";
+import { Repository } from './persistence';
+import api from './api';
 
 const URL_FORMAT_MATCH = /http:\/\/tier.app\/(.*)/;
 
-describe("POST /", () => {
-    it("requires url parameter", async () => {
-        const response = await request(api).post('/')
-        .set('Content-Type', 'application/json')
-        .send({});
+describe('POST /', () => {
+    it('requires url parameter', async () => {
+        const response = await request(api)
+            .post('/')
+            .set('Content-Type', 'application/json')
+            .send({});
         expect(response.statusCode).toEqual(400);
     });
-    it("generates short url", async () => {
-        const response = await request(api).post('/')
-        .set('Content-Type', 'application/json')
-        .send({
-            url: "https://www.google.com"
-        });
+    it('generates short url', async () => {
+        const response = await request(api)
+            .post('/')
+            .set('Content-Type', 'application/json')
+            .send({
+                url: 'https://www.google.com',
+            });
         expect(response.statusCode).toEqual(200);
         const body = JSON.parse(response.text);
 
@@ -25,18 +27,19 @@ describe("POST /", () => {
     });
 });
 
-describe("GET /", () => {
-    it("returns 404 unknown", async () => {
+describe('GET /', () => {
+    it('returns 404 unknown', async () => {
         const response = await request(api).get('/unknown');
         expect(response.statusCode).toEqual(404);
     });
 
-    it("returns 301 for created id", async () => {
-        const createResponse = await request(api).post('/')
-        .set('Content-Type', 'application/json')
-        .send({
-            url: "https://www.google.com"
-        });
+    it('returns 301 for created id', async () => {
+        const createResponse = await request(api)
+            .post('/')
+            .set('Content-Type', 'application/json')
+            .send({
+                url: 'https://www.google.com',
+            });
 
         expect(createResponse.statusCode).toEqual(200);
         const body = JSON.parse(createResponse.text);
@@ -51,11 +54,12 @@ describe("GET /", () => {
     });
 
     it('should increate visit count', async () => {
-        const createResponse = await request(api).post('/')
-        .set('Content-Type', 'application/json')
-        .send({
-            url: "https://www.google.com"
-        });
+        const createResponse = await request(api)
+            .post('/')
+            .set('Content-Type', 'application/json')
+            .send({
+                url: 'https://www.google.com',
+            });
 
         expect(createResponse.statusCode).toEqual(200);
         const body = JSON.parse(createResponse.text);
@@ -73,5 +77,5 @@ describe("GET /", () => {
         expect(response.header?.location).toBe('https://www.google.com');
 
         expect(Repository.getCount(id)).toBe(2);
-    })
+    });
 });

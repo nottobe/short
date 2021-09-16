@@ -1,4 +1,4 @@
-import * as express from "express";
+import * as express from 'express';
 import { Repository } from './persistence';
 
 const BASE_URL = 'tier.app';
@@ -9,8 +9,8 @@ const app = express();
 
 app.use(express.json());
 
-app.post("/", (req, res) => {
-    if(req.body?.url) {
+app.post('/', (req, res) => {
+    if (req.body?.url) {
         const id = Repository.addUrl(req.body?.url);
         res.json({ shortUrl: `${req.protocol}://${BASE_URL}/${id}` });
     } else {
@@ -18,12 +18,12 @@ app.post("/", (req, res) => {
     }
 });
 
-app.get("/*", (req, res) => {
+app.get('/*', (req, res) => {
     const id = req.path.replace('/', '');
     const url = Repository.getUrl(id);
 
     if (url) {
-        return res.redirect(301 , url);
+        return res.redirect(301, url);
     }
     res.sendStatus(404);
 });

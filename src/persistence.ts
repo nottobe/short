@@ -1,7 +1,10 @@
 import { nanoid } from 'nanoid';
 
 export class Repository {
-    private static SHORT_URLS = new Map<string, {url: string, count: number}>();
+    private static SHORT_URLS = new Map<
+        string,
+        { url: string; count: number }
+    >();
 
     public static addUrl(url: string): string {
         const id = nanoid();
@@ -26,8 +29,8 @@ export class Repository {
         let count = undefined;
         if (Repository.SHORT_URLS.has(id)) {
             const shortUrl = Repository.SHORT_URLS.get(id);
-            count = shortUrl.count
+            count = shortUrl.count;
         }
         return count;
     }
-};
+}
