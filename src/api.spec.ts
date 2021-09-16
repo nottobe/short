@@ -1,5 +1,9 @@
-import api from "./api";
 import * as request from "supertest";
+
+import { Repository } from "./persistence";
+import api from "./api";
+
+const URL_FORMAT_MATCH = /http:\/\/tier.app\/(.*)/;
 
 describe("POST /", () => {
     it("requires url parameter", async () => {
@@ -17,7 +21,7 @@ describe("POST /", () => {
         expect(response.statusCode).toEqual(200);
         const body = JSON.parse(response.text);
 
-        expect(body?.shortUrl).toMatch(/http:\/\/tier.app\//);
+        expect(body?.shortUrl).toMatch(URL_FORMAT_MATCH);
     });
 });
 
@@ -37,7 +41,7 @@ describe("GET /", () => {
         expect(createResponse.statusCode).toEqual(200);
         const body = JSON.parse(createResponse.text);
 
-        const shortUrl = body?.shortUrl.match(/http:\/\/tier.app\/(.*)/);
+        const shortUrl = body?.shortUrl.match(URL_FORMAT_MATCH);
         expect(shortUrl.length).toBe(2);
         const id = shortUrl[1];
 
@@ -45,4 +49,29 @@ describe("GET /", () => {
         expect(response.statusCode).toEqual(301);
         expect(response.header?.location).toBe('https://www.google.com');
     });
+
+    it('should increate visit count', async () => {
+        const createResponse = await request(api).post('/')
+        .set('Content-Type', 'application/json')
+        .send({
+            url: "https://www.google.com"
+        });
+
+        expect(createResponse.statusCode).toEqual(200);
+        const body = JSON.parse(createResponse.text);
+
+        const shortUrl = body?.shortUrl.match(URL_FORMAT_MATCH);
+        expect(shortUrl.length).toBe(2);
+        const id = shortUrl[1];
+
+        const response = await request(api).get(`/${id}`);
+        expect(response.statusCode).toEqual(301);
+        expect(response.header?.location).toBe('https://www.google.com');
+
+        const secondResponse = await request(api).get(`/${id}`);
+        expect(response.statusCode).toEqual(301);
+        expect(response.header?.location).toBe('https://www.google.com');
+
+        expect(Repository.getCount(id)).toBe(2);
+    })
 });

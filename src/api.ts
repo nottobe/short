@@ -1,5 +1,5 @@
 import * as express from "express";
-import { nanoid } from 'nanoid';
+import { Repository } from './persistence';
 
 const BASE_URL = 'tier.app';
 
@@ -11,8 +11,7 @@ app.use(express.json());
 
 app.post("/", (req, res) => {
     if(req.body?.url) {
-        const id = nanoid();
-        SHORT_URLS.set(id, req.body?.url);
+        const id = Repository.addUrl(req.body?.url);
         res.json({ shortUrl: `${req.protocol}://${BASE_URL}/${id}` });
     } else {
         res.sendStatus(400);
@@ -21,9 +20,10 @@ app.post("/", (req, res) => {
 
 app.get("/*", (req, res) => {
     const id = req.path.replace('/', '');
+    const url = Repository.getUrl(id);
 
-    if (SHORT_URLS.has(id)) {
-        return res.redirect(301 , SHORT_URLS.get(id));
+    if (url) {
+        return res.redirect(301 , url);
     }
     res.sendStatus(404);
 });
